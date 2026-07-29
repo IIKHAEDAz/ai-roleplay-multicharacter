@@ -15,6 +15,27 @@ let templates = [];
 let templateSource = '';
 let toastTimer;
 
+// Navigation must work immediately, even while the long guide file is still loading.
+// Keeping this outside init() also makes the menu resilient to a content fetch error.
+function bindMobileNavigation() {
+  if (!menuButton || !mainNav || menuButton.dataset.bound === 'true') return;
+  menuButton.dataset.bound = 'true';
+
+  menuButton.addEventListener('click', () => {
+    const open = menuButton.getAttribute('aria-expanded') === 'true';
+    menuButton.setAttribute('aria-expanded', String(!open));
+    mainNav.classList.toggle('is-open', !open);
+  });
+
+  mainNav.addEventListener('click', (event) => {
+    if (!event.target.closest('a')) return;
+    menuButton.setAttribute('aria-expanded', 'false');
+    mainNav.classList.remove('is-open');
+  });
+}
+
+bindMobileNavigation();
+
 const escapeHtml = (value = '') => value
   .replaceAll('&', '&amp;')
   .replaceAll('<', '&lt;')
@@ -275,15 +296,6 @@ function bindInteractions() {
     searchInput.focus({ preventScroll: true });
   });
 
-  menuButton.addEventListener('click', () => {
-    const open = menuButton.getAttribute('aria-expanded') === 'true';
-    menuButton.setAttribute('aria-expanded', String(!open));
-    mainNav.classList.toggle('is-open', !open);
-  });
-  mainNav.addEventListener('click', () => {
-    menuButton.setAttribute('aria-expanded', 'false');
-    mainNav.classList.remove('is-open');
-  });
 }
 
 function bindScrollState() {

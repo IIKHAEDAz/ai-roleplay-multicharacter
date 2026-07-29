@@ -169,7 +169,38 @@ body, .guide-library { background-attachment: scroll !important; }
   .guide-group-button { min-height: 142px; }
 }
 @media (max-width: 719px) {
+  /* Mobile header: keep the complete glass frame inside the safe viewport and
+     guarantee that the menu control owns the top interaction layer. */
+  .site-header {
+    left: auto;
+    right: auto;
+    width: calc(100% - 24px);
+    max-width: 620px;
+    margin-inline: auto;
+    padding: 10px 12px;
+    overflow: visible;
+  }
+  .site-header::before,
+  .site-header::after { pointer-events: none; }
+  .brand { min-width: 0; }
+  .brand-logo { flex: 0 0 auto; }
   .brand-copy strong { max-width: 46vw; overflow: hidden; font-size: 1rem; text-overflow: ellipsis; }
+  .menu-toggle {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    touch-action: manipulation;
+  }
+  .site-nav {
+    z-index: 3;
+    top: calc(env(safe-area-inset-top, 0px) + 82px);
+  }
+
+  /* iOS can focus the skip link after navigating from the browser chrome.
+     Keep the keyboard affordance on desktop, but never leave it floating on touch. */
+  .skip-link { display: none; }
   .hero-content { max-width: none; }
   .hero-line-main { font-size: 1em; }
   .hero-line-accent { max-width: 8.7ch; }
@@ -200,6 +231,40 @@ body, .guide-library { background-attachment: scroll !important; }
   .template-inner { padding: 0 0 28px; }
   .template-description { padding: 0 8px; }
   .code-panel pre { max-height: 360px; padding: 16px; font-size: .69rem; }
+
+  /* One centred mobile footer column; no desktop auto-columns leaking through. */
+  .site-footer {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    padding: 48px 20px max(44px, calc(env(safe-area-inset-bottom) + 24px));
+    text-align: center;
+  }
+  .site-footer .footer-brand {
+    width: min(100%, 520px);
+    justify-content: center;
+  }
+  .site-footer .footer-brand > div { min-width: 0; }
+  .site-footer .footer-brand strong {
+    display: block;
+    font-size: clamp(1.35rem, 6.3vw, 1.75rem);
+    line-height: 1.22;
+    overflow-wrap: normal;
+  }
+  .site-footer .footer-brand p {
+    max-width: 34ch;
+    margin: 10px auto 0;
+    font-size: .78rem;
+    line-height: 1.7;
+  }
+  .site-footer .footer-links {
+    width: min(100%, 520px);
+    justify-content: center;
+    gap: 12px 20px;
+  }
+  .site-footer .copyright { margin-inline: auto; }
 }
 
 @supports not ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
