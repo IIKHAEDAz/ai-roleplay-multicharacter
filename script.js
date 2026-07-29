@@ -299,10 +299,14 @@ function bindInteractions() {
 }
 
 function bindScrollState() {
+  if (document.documentElement.dataset.scrollBound === 'true') return;
+  document.documentElement.dataset.scrollBound = 'true';
   const updateProgress = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight;
-    const percent = max > 0 ? Math.min(100, Math.max(0, window.scrollY / max * 100)) : 0;
+    const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    const percent = progress * 100;
     document.documentElement.style.setProperty('--read', `${percent}%`);
+    document.documentElement.style.setProperty('--scroll-progress', progress.toFixed(4));
   };
   updateProgress();
   window.addEventListener('scroll', updateProgress, { passive: true });
@@ -442,7 +446,6 @@ async function init() {
     renderGuide();
     renderTemplates();
     bindInteractions();
-    bindScrollState();
   } catch (error) {
     const serverUrl = `http://127.0.0.1:4173/roleplay-studio/?v=20260729-guide9${location.hash || '#top'}`;
     guideContent.innerHTML = `<div class="file-open-help"><strong>หน้านี้ต้องเปิดผ่านเว็บเซิร์ฟเวอร์</strong><p>ถ้าเปิดจากไฟล์โดยตรง เบราว์เซอร์จะไม่อนุญาตให้โหลดคู่มือด้านใน</p><a href="${serverUrl}">เปิดเวอร์ชันเว็บภายนอก</a></div>`;
@@ -451,4 +454,7 @@ async function init() {
   }
 }
 
+// The header progress line should move from the first scroll frame and must not
+// depend on the guide content finishing its network request.
+bindScrollState();
 init();
