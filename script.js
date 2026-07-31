@@ -157,6 +157,12 @@ function parseDocument(raw) {
   templateSource = partIndex >= 0 ? raw.slice(partIndex) : '';
   guideSections = splitByHeading(guideSource).filter(({ title }) => /^\d+\./.test(title));
   templates = splitByHeading(templateSource).filter(({ title }) => /^[A-Q]\./.test(title));
+
+  // The published guide is expected to contain all 19 chapters and templates A–Q.
+  // Fail visibly instead of silently publishing an incomplete archive.
+  if (guideSections.length !== 19 || templates.length !== 17) {
+    throw new Error(`เนื้อหาไม่ครบ: พบคู่มือ ${guideSections.length}/19 บท และแม่แบบ ${templates.length}/17 ชุด`);
+  }
 }
 
 function renderGuide() {
@@ -440,7 +446,7 @@ document.head.append(youtubeApiScript);
 
 async function init() {
   try {
-    const response = await fetch('content.md?v=20260729-guide4');
+    const response = await fetch('content.md?v=20260731-readable1');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     parseDocument(await response.text());
     renderGuide();
@@ -448,7 +454,10 @@ async function init() {
     bindInteractions();
   } catch (error) {
     const serverUrl = `http://127.0.0.1:4173/roleplay-studio/?v=20260729-guide9${location.hash || '#top'}`;
-    guideContent.innerHTML = `<div class="file-open-help"><strong>หน้านี้ต้องเปิดผ่านเว็บเซิร์ฟเวอร์</strong><p>ถ้าเปิดจากไฟล์โดยตรง เบราว์เซอร์จะไม่อนุญาตให้โหลดคู่มือด้านใน</p><a href="${serverUrl}">เปิดเวอร์ชันเว็บภายนอก</a></div>`;
+    const openedAsFile = location.protocol === 'file:';
+    guideContent.innerHTML = openedAsFile
+      ? `<div class="file-open-help"><strong>หน้านี้ต้องเปิดผ่านเว็บเซิร์ฟเวอร์</strong><p>ถ้าเปิดจากไฟล์โดยตรง เบราว์เซอร์จะไม่อนุญาตให้โหลดคู่มือด้านใน</p><a href="${serverUrl}">เปิดเวอร์ชันเว็บภายนอก</a></div>`
+      : `<div class="file-open-help"><strong>โหลดคู่มือไม่สำเร็จ</strong><p>${escapeHtml(error.message || 'กรุณาลองรีเฟรชหน้าเว็บอีกครั้ง')}</p></div>`;
     templateContent.innerHTML = '';
     console.error(error);
   }
